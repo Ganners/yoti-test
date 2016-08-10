@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+// We want to let our siblings know our full state upon joining. It's fairly
+// straightforward here
+message StoreState {
+  map<string, bytes> data = 1;
+}

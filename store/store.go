@@ -2,7 +2,11 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"sync"
+
+	"github.com/ganners/core_interview/store/pb/store"
+	"github.com/gogo/protobuf/proto"
 )
 
 const (
@@ -70,5 +74,39 @@ func (kv *InMemoryStore) Write(key []byte, value []byte, overwrite bool) error {
 	}
 
 	kv.data[strKey] = value
+	return nil
+}
+
+// Outside of the Read/Write interface, it's useful for us to be able to
+// convert our data into a protobuf so that we can fully replicate the state to
+// new store members in the cluster
+func (kv *InMemoryStore) ToProto() proto.Message {
+
+	kv.RLock()
+	defer kv.RUnlock()
+
+	return &store.StoreState{
+		Data: kv.data,
+	}
+}
+
+// Outside of the Read/Write interface, it's useful for us to be able to
+// convert our data into a protobuf so that we can fully replicate the state to
+// new store members in the cluster
+func (kv *InMemoryStore) FromProtoBytes(bytes []byte) error {
+	storeState := &store.StoreState{}
+	err := proto.Unmarshal(bytes, storeState)
+	if err != nil {
+		fmt.Errorf("unable to unmarshal storeState: %s", err)
+	}
+
+	kv.Lock()
+	defer kv.Unlock()
+
+	// Merge the data from that into this (don't just replace, that might miss
+	// something)
+	for k, v := range storeState.GetData() {
+		kv.data[k] = v
+	}
 	return nil
 }

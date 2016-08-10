@@ -3,6 +3,8 @@ package main
 import (
 	"reflect"
 	"testing"
+
+	"github.com/gogo/protobuf/proto"
 )
 
 // Fairly trivial set of tests operating on a store. Will at least
@@ -85,5 +87,32 @@ func TestInMemoryStoreReadWrite(t *testing.T) {
 				t.Errorf("Expected read output of '%s', got '%s'", string(test.expectedOutput), string(data))
 			}
 		}
+	}
+}
+
+func TestMarshalUnmarshalInMemoryStore(t *testing.T) {
+	store := NewInMemoryStore()
+	store.Write([]byte("key 1"), []byte("value 1"), true)
+	store.Write([]byte("key 2"), []byte("value 2"), true)
+	store.Write([]byte("key 3"), []byte("value 3"), true)
+	store.Write([]byte("key 4"), []byte("value 4"), true)
+	store.Write([]byte("key 5"), []byte("value 5"), true)
+
+	// Convert it to a protobuf
+	pb := store.ToProto()
+	bytes, err := proto.Marshal(pb)
+	if err != nil {
+		t.Fatalf("did not expected to see error, got %s", err)
+	}
+
+	storeReplica := NewInMemoryStore()
+	err = storeReplica.FromProtoBytes(bytes)
+	if err != nil {
+		t.Fatalf("did not expected to see error, got %s", err)
+	}
+
+	// Check the replica matches the original
+	if !reflect.DeepEqual(store, storeReplica) {
+		t.Errorf("replica %+v does not match original %+v", storeReplica, store)
 	}
 }
