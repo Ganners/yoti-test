@@ -5,3 +5,17 @@ syntax = "proto3";
 message StoreState {
   map<string, bytes> data = 1;
 }
+
+message ReadRequest {
+  bytes key = 1;
+}
+
+message ReadResponse {
+  bytes value = 1;
+}
+
+message WriteRequest {
+  bytes key = 1;
+  bytes value = 2;
+  bool  overwrite = 3;
+}

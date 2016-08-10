@@ -18,8 +18,13 @@ const (
 // KVStore is an interface which can read and write arbitrary slices of bytes
 // to keys which are named by slices of bytes
 type KVStore interface {
+	// Read and Write
 	Read(key []byte) ([]byte, error)
 	Write(key, value []byte, overwrite bool) error
+
+	// Convert to and from protobuf
+	FromProtoBytes(bytes []byte) error
+	ToProto() proto.Message
 }
 
 var (
