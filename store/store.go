@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/ganners/core_interview/store/pb/store"
+	"github.com/ganners/yoti-test/store/pb/store"
 	"github.com/gogo/protobuf/proto"
 )
 

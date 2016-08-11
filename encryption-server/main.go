@@ -27,7 +27,7 @@ func main() {
 	}
 
 	server.Handle("encryption-server.read", readHandler)
-	server.Handle("encryption-server.write", readHandler)
+	server.Handle("encryption-server.write", writeHandler)
 
 	// Run this server until it is signalled to stop
 	<-server.Start()
@@ -37,14 +37,15 @@ func main() {
 
 // Read handler handles encrypted reads
 func readHandler(server *gossip.Server, request envelope.Envelope) error {
+
+	server.Logger.Debugf("Received read request")
+
 	// Unmarshal the message
 	readRequest := &encryption.EncryptedReadRequest{}
 	err := proto.Unmarshal(request.EncodedMessage, readRequest)
 	if err != nil {
 		return fmt.Errorf("unable to unmarshal read request: %+v", err)
 	}
-
-	server.Logger.Debugf("Received read request")
 
 	id := readRequest.Id
 	key := readRequest.Key
@@ -53,6 +54,7 @@ func readHandler(server *gossip.Server, request envelope.Envelope) error {
 		return errors.New("id or key length is 0")
 	}
 
+	server.Logger.Debugf("Broadcasting to read from store")
 	err, rsp, timeout := server.BroadcastAndWaitForResponse(
 		"store.read",
 		&store.ReadRequest{
@@ -68,6 +70,7 @@ func readHandler(server *gossip.Server, request envelope.Envelope) error {
 		return errors.New("Timed out waiting for response")
 	case responseEnvelope := <-rsp:
 		// Unmarshal response
+		server.Logger.Debugf("Received from store, decrypting")
 		storeReadRsp := &store.ReadResponse{}
 		err := proto.Unmarshal(responseEnvelope.EncodedMessage, storeReadRsp)
 		if err != nil {
@@ -81,6 +84,7 @@ func readHandler(server *gossip.Server, request envelope.Envelope) error {
 		}
 
 		// Broadcast response if there's a receipt
+		server.Logger.Debugf("Returning read response")
 		readResponse := &encryption.EncryptedReadResponse{
 			Plaintext: decrypted,
 		}
@@ -97,14 +101,15 @@ func readHandler(server *gossip.Server, request envelope.Envelope) error {
 
 // Write handler handles encrypted writes
 func writeHandler(server *gossip.Server, request envelope.Envelope) error {
+
+	server.Logger.Debugf("Received write request")
+
 	// Unmarshal the message
 	writeRequest := &encryption.EncryptedWriteRequest{}
 	err := proto.Unmarshal(request.EncodedMessage, writeRequest)
 	if err != nil {
 		return fmt.Errorf("unable to unmarshal read request: %+v", err)
 	}
-
-	server.Logger.Debugf("Received write request")
 
 	id := writeRequest.Id
 	plaintext := writeRequest.Plaintext
@@ -136,8 +141,10 @@ func writeHandler(server *gossip.Server, request envelope.Envelope) error {
 	writeResponse := &encryption.EncryptedWriteResponse{
 		Key: key,
 	}
+	server.Logger.Debugf("About to send back response")
 	headers := request.GetHeaders()
 	if headers != nil && len(headers.Receipt) > 0 {
+		server.Logger.Debugf("Broadcasting response...")
 		_, err := server.Broadcast(request.Headers.Receipt, writeResponse, int32(envelope.Envelope_RESPONSE))
 		return err
 	}

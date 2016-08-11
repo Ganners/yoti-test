@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/ganners/core_interview/store/pb/store"
 	"github.com/ganners/gossip"
 	"github.com/ganners/gossip/pb/envelope"
+	"github.com/ganners/yoti-test/store/pb/store"
 	"github.com/gogo/protobuf/proto"
 )
 
@@ -87,7 +87,7 @@ func writeHandler(kvstore KVStore) gossip.RequestHandlerFunc {
 			return fmt.Errorf("unable to unmarshal write request: %+v", err)
 		}
 
-		if len(writeRequest.Key) > 0 || len(writeRequest.Value) > 0 {
+		if len(writeRequest.Key) == 0 || len(writeRequest.Value) == 0 {
 			return errors.New("cannot write empty key or value")
 		}
 

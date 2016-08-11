@@ -7,3 +7,5 @@ Thumbs.DB
 *.swo
 
 */store
+*/encryption-server
+*/cli-client
