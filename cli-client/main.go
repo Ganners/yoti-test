@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/Ganners/yoti-test/encryption-server/pb/encryption"
 	"github.com/ganners/gossip"
 	"github.com/ganners/yoti-test/client"
+	"github.com/ganners/yoti-test/encryption-server/pb/encryption"
 	"github.com/gogo/protobuf/proto"
 )
 
