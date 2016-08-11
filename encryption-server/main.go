@@ -58,7 +58,7 @@ func readHandler(server *gossip.Server, request envelope.Envelope) error {
 	err, rsp, timeout := server.BroadcastAndWaitForResponse(
 		"store.read",
 		&store.ReadRequest{
-			Key: key,
+			Key: id,
 		},
 	)
 	if err != nil {
@@ -125,10 +125,11 @@ func writeHandler(server *gossip.Server, request envelope.Envelope) error {
 	}
 
 	// Async write request and return key
+	server.Logger.Debugf("Broadcasting write to store")
 	_, err = server.Broadcast(
 		"store.write",
 		&store.WriteRequest{
-			Key:       key,
+			Key:       id,
 			Value:     encrypted,
 			Overwrite: true,
 		},

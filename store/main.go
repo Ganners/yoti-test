@@ -47,6 +47,9 @@ func main() {
 // supposed to be called syncronously as a response will be returned
 func readHandler(kvstore KVStore) gossip.RequestHandlerFunc {
 	return func(server *gossip.Server, request envelope.Envelope) error {
+
+		server.Logger.Debugf("Dealing with read request")
+
 		// Unmarshal the message
 		readRequest := &store.ReadRequest{}
 		err := proto.Unmarshal(request.EncodedMessage, readRequest)
@@ -55,6 +58,7 @@ func readHandler(kvstore KVStore) gossip.RequestHandlerFunc {
 		}
 
 		// Look for data
+		server.Logger.Debugf("Reading key: %s", readRequest.Key)
 		data, err := kvstore.Read(readRequest.Key)
 		if err != nil {
 			return fmt.Errorf("unable to read key: %+v", err)
@@ -66,6 +70,7 @@ func readHandler(kvstore KVStore) gossip.RequestHandlerFunc {
 		}
 		headers := request.GetHeaders()
 		if headers != nil && len(headers.Receipt) > 0 {
+			server.Logger.Debugf("Broadcasting response: %s", readRequest.Key)
 			_, err := server.Broadcast(request.Headers.Receipt, readResponse, int32(envelope.Envelope_RESPONSE))
 			return err
 		}
@@ -80,6 +85,9 @@ func readHandler(kvstore KVStore) gossip.RequestHandlerFunc {
 // broadcasts
 func writeHandler(kvstore KVStore) gossip.RequestHandlerFunc {
 	return func(server *gossip.Server, request envelope.Envelope) error {
+
+		server.Logger.Debugf("Dealing with write request")
+
 		// Unmarshal the message
 		writeRequest := &store.WriteRequest{}
 		err := proto.Unmarshal(request.EncodedMessage, writeRequest)
@@ -91,6 +99,7 @@ func writeHandler(kvstore KVStore) gossip.RequestHandlerFunc {
 			return errors.New("cannot write empty key or value")
 		}
 
+		server.Logger.Debugf("Adding key: %s", writeRequest.Key)
 		return kvstore.Write(writeRequest.Key, writeRequest.Value, writeRequest.Overwrite)
 	}
 }
