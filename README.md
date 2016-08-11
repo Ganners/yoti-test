@@ -2,23 +2,24 @@
 
 ## About
 
-**This is still WIP**
-
 My solution to this test revolves largely around the idea of gossiping. I have
 put together a microservice gossip framework as part of this
-(https://github.com/ganners/gossip). This is in now way complete, it's missing
-a lot actually - though the scope naturally increases as one might expect.
+(https://github.com/ganners/gossip). This is in no way complete, it's missing a
+lot actually - though the scope naturally increases as the project progressed!
 
-There are actually some vital pieces missing, which you may notice. To name
-some of the most apparant:
+There are actually some vital pieces missing, which probably won't go
+unnoticed. To name some of the most apparant:
 
  + Errors do not get broadcasted, I feel the API for this needs to change so
-   that it is a little bit less verbose which needs some thought.
+   that it is a little bit less verbose which needs some thought. This becomes
+   apparant when you get a timeout if there was an error for any reason!
  + It does not send to a random distribution of nodes, it sends to it's whole
-   list
+   list. It's not much of an issue with only a few nodes.
  + Node lists do not get broadcast (though isn't strictly necessary here - it
    would be in production).
  + There's no strategy for configuration
+ + Missing scheduled tasks (healthchecks etc.)
+ + No retrying strategy
 
 There's more, you'll find `@TODO` comments littered throughout. I plan on
 making this work - I think it will make a cool side project which needs to
