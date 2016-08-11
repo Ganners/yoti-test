@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+message EncryptedReadRequest {
+  bytes key = 1;
+  bytes id = 2;
+}
+
+message EncryptedReadResponse {
+  bytes plaintext = 1;
+}
+
+message EncryptedWriteRequest {
+  bytes plaintext = 1;
+  bytes id = 2;
+}
+
+message EncryptedWriteResponse {
+  bytes key = 1;
+}
