@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"log"
 
 	"github.com/ganners/gossip"
 	"github.com/ganners/yoti-test/client"
@@ -69,7 +68,6 @@ func (cli *CLIClient) Retrieve(id, aesKey []byte) (payload []byte, err error) {
 		Id:  id,
 	}
 
-	log.Println("Sending read")
 	err, resp, timeout := cli.server.BroadcastAndWaitForResponse(
 		"encryption-server.read",
 		readRequest)
@@ -81,7 +79,6 @@ func (cli *CLIClient) Retrieve(id, aesKey []byte) (payload []byte, err error) {
 	case <-timeout:
 		return nil, errors.New("timed out waiting for retrieve response")
 	case responseEnvelope := <-resp:
-		log.Println("RECEIVED RESPONSE")
 		readRsp := &encryption.EncryptedReadResponse{}
 		err := proto.Unmarshal(responseEnvelope.EncodedMessage, readRsp)
 		if err != nil {
